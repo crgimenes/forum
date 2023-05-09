@@ -1,6 +1,9 @@
 package pg
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"crg.eti.br/go/forum/config"
 	"crg.eti.br/go/forum/db"
 	"github.com/jmoiron/sqlx"
@@ -99,16 +102,62 @@ func (p *Pg) ListTopics(parent_id int) ([]db.Topic, error) {
 			return nil, err
 		}
 		if topic.ParentID == 0 || topic.ParentID == parent_id {
+
+			topic.Threads, err = p.ListThreadsPerTopic(topic.ID)
+			if err != nil {
+				return nil, err
+			}
+
 			topics = append(topics, topic)
 			continue
 		}
 		for i, t := range topics {
 			if t.ID == topic.ParentID {
+
+				topic.Threads, err = p.ListThreadsPerTopic(topic.ID)
+				if err != nil {
+					return nil, err
+				}
+
 				topics[i].Topics = append(topics[i].Topics, topic) // add subtopic
 				break
 			}
 		}
 	}
 
+	b, _ := json.MarshalIndent(topics, "", "  ")
+	fmt.Println(string(b))
+
 	return topics, nil
+}
+
+func (p *Pg) ListThreadsPerTopic(topicID int) ([]db.Thread, error) {
+	sqlStatement := `SELECT 
+	id,
+	title,
+	slug,
+	description,
+	created_at,
+	updated_at
+	FROM forum_threads 
+	WHERE topic_id = $1
+	ORDER BY zorder, updated_at DESC;`
+
+	query, err := p.db.Queryx(sqlStatement, topicID)
+	if err != nil {
+		return nil, err
+	}
+	defer query.Close()
+
+	var threads []db.Thread
+	for query.Next() {
+		var thread db.Thread
+		err := query.StructScan(&thread)
+		if err != nil {
+			return nil, err
+		}
+		threads = append(threads, thread)
+	}
+
+	return threads, nil
 }
