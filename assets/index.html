@@ -21,6 +21,15 @@
               <li><a href="/forum/{{ $p_slug }}/{{ .Slug }}">{{ .Title }}</a><br />
                 {{ .Description }}
                 <hr />
+                {{ $t_slug := .Slug }}
+
+                {{ range .Threads }}
+                  <li><a href="/forum/{{ $p_slug }}/{{ $p_slug }}/{{ .Slug }}">{{ .Title }}</a><br />
+                    {{ .Description }}
+                    <hr />
+                  </li>
+                {{ end }}
+
               </li>
               {{ end }}
             </ul>
