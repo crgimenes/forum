@@ -29,4 +29,5 @@ type DB interface {
 	Close() error
 	GetTopicID(slug []string) (int, error)
 	ListTopics(parent_id int) ([]Topic, error)
+	ListThreadsPerTopic(topicID int) ([]Thread, error)
 }
