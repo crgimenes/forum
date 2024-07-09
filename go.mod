@@ -6,7 +6,7 @@ require (
 	crg.eti.br/go/config v1.5.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
-	golang.org/x/text v0.14.0
+	golang.org/x/text v0.16.0
 )
 
 require (
